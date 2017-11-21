@@ -1,26 +1,28 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
 
-import smtplib
+import argparse
+import socket
 
-smtpObj = smtplib.SMTP('localhost', 25)
-smtpObj.login('username', 'pass')
+#parsing the from, to and msg
 
-sender = ''
-receivers = ['']
+def connect(server, port=25):
+    try:
+        sock = socket.create_connection((server, port))
+    except:
+        print "Unable to connect"
 
-msg = """From: anyone <person@person.com>
-To: toPerson <to@toperson.com>
-Subject: test
+def send_message(msg, _from, to, subject):
 
-This is a test.
-"""
+    sock.send(b"MAIL FROM" + _from.encode() + "\n")
+    #sock.recv("1024")
 
-try:
-	smtpObj = smtplib.SMTP('localhost', 25)
-	smtpObj.sendmail(sender, receivers, msg)
-	print "Successfully sent email"
-except SMTPException:
-	print "Error: unable to send email"
+    sock.send(b"RCPT TO" + to.encode() + "\n")
+    #sock.recv("1024")
 
-smtpObj.quit()
+    sock.send(b"DATA" + bytes(msg, encoding="utf-8") + "\n.\n") 
+    #sock.recv("1024")
+    
+    sock.shutdown(socket.SHUT_RDWR)
+    sock.close()
+
 
